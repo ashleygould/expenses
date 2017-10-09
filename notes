@@ -1,0 +1,6 @@
+after saving .xlsx to .csv on mac, end of line is '^M'.  need to filter 
+into unix end-of-line:
+
+tr '\r' '\n' < input_data.csv > converted
+
+
