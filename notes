@@ -3,4 +3,6 @@ into unix end-of-line:
 
 tr '\r' '\n' < input_data.csv > converted
 
+Turns out not to be needed.  cvs.reader defaults to EOL chars of either '\r' or '\n'.
+
 
