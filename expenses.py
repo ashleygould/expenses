@@ -29,12 +29,25 @@ def cents(amount_str):
 def dollars(amount_in_cents):
     return format_currency(amount_in_cents / 100, 'USD')
 
-def report_by_categories(expenses):
+def report_by_categories(expenses, split_facter=0):
+    total = 0
     for category in sorted(set([e.Category for e in expenses])):
         amounts = [cents(e.Amount) for e in expenses if e.Category == category]
         if amounts:
-            total = reduce(lambda x, y: x+y, amounts)
-            print('  {:<32}{:>12}'.format(category + ':', dollars(total)))
+            summed = reduce(lambda x, y: x+y, amounts)
+            total += summed
+            if split_facter:
+                print('  {:<32}{:>12}{:>12}'.format(
+                        category + ':', dollars(summed), dollars(summed / split_facter)))
+            else:
+                print('  {:<32}{:>12}'.format(category + ':', dollars(summed)))
+    if total:
+        if split_facter:
+            print('{:>46}{:>12}'.format('-'*8, '-'*8))
+            print('Total:{:>40}{:>12}'.format(dollars(total), dollars(total / split_facter)))
+        else:
+            print('{:>46}'.format('-'*8))
+            print('Total:{:>40}'.format(dollars(total)))
 
 def find_duplicates(expense_items, duplicate_sets=[]):
     if len(expense_items) <= 1:
@@ -42,14 +55,14 @@ def find_duplicates(expense_items, duplicate_sets=[]):
     else:
         item = expense_items.pop()
         dups_for_item = [e for e in expense_items
-                if (e.Date, e.Amount, e.Category, e.Property, e.Source, e.CheckNum) ==
-                (item.Date, item.Amount, item.Category, item.Property, item.Source, item.CheckNum)]
+                if (e.Date, e.Amount, e.Category, e.CheckNum) ==
+                (item.Date, item.Amount, item.Category, item.CheckNum)]
+                #if (e.Date, e.Amount, e.Category) == (item.Date, item.Amount, item.Category)]
         if dups_for_item:
             dups_for_item.append(item)
             duplicate_sets.append(dups_for_item)
             expense_items = [x for x in expense_items if x not in dups_for_item]
         return find_duplicates(expense_items, duplicate_sets)
-
 
 def main():
     args = docopt(__doc__)
@@ -67,7 +80,9 @@ def main():
                 print('bad row at line %s: %s' % (reader.line_num, row))
                 continue
             else:
-                if not expense.Amount:
+                if not expense.Date:
+                    print('Amount missing at line %s: %s' % (reader.line_num, row))
+                elif not expense.Amount:
                     print('Amount missing at line %s: %s' % (reader.line_num, row))
                 elif not expense.Category:
                     print('Category missing at line %s: %s' % (reader.line_num, row))
@@ -77,23 +92,23 @@ def main():
     if args['-v']:
         for e in expenses: print(e)
 
-    by_property = dict()
+    expenses_by_property = dict()
     for property in set([e.Property for e in expenses]):
         if property:
-            by_property[property] = []
-        else:
-            by_property['General'] = []
+            expenses_by_property[property] = list()
+    general_expenses = list()
     for e in expenses:
         if not e.Property:
-            by_property['General'].append(e)
+            general_expenses.append(e)
         else:
-            by_property[e.Property].append(e)
-    general = by_property.pop('General')
-    for property in sorted(by_property.keys()):
+            expenses_by_property[e.Property].append(e)
+    for property in sorted(expenses_by_property.keys()):
         print("\nProperty: %s" % property)
-        report_by_categories(by_property[property])
-    print("\nProperty: General")
-    report_by_categories(general)
+        report_by_categories(expenses_by_property[property])
+    if general_expenses:
+        print("\nProperty: General")
+        report_by_categories(general_expenses, len(expenses_by_property))
+
 
     duplicates = find_duplicates(list(expenses))
     if duplicates:

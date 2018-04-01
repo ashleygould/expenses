@@ -1,8 +1,40 @@
+Saving Excell Spreadsheets
+--------------------------
+
 after saving .xlsx to .csv on mac, end of line is '^M'.  need to filter 
 into unix end-of-line:
 
 tr '\r' '\n' < input_data.csv > converted
 
 Turns out not to be needed.  cvs.reader defaults to EOL chars of either '\r' or '\n'.
+
+
+
+
+
+Excell tips
+-----------
+
+making a column post dollars:
+select column
+under 'number' dropdown select 'Accounting'
+
+making a column sortable:
+click on 'filter' icon
+
+
+summing by category:
+filter by property
+select amount category columns
+copy to new table (sheet)
+go to the pivot table sheet
+select 'sum of amount' table (exclude income, net income)
+click on table
+click on 'pivottable' menu on top bar
+select 'change source'
+click icon to right of location field
+go to filtered table, select amount, category columns
+
+
 
 
