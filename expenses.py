@@ -55,8 +55,8 @@ def find_duplicates(expense_items, duplicate_sets=[]):
     else:
         item = expense_items.pop()
         dups_for_item = [e for e in expense_items
-                if (e.Date, e.Amount, e.Category, e.CheckNum) ==
-                (item.Date, item.Amount, item.Category, item.CheckNum)]
+                if (e.Date, e.Amount, e.Category, e.Property, e.CheckNum) ==
+                (item.Date, item.Amount, item.Category, item.Property, item.CheckNum)]
                 #if (e.Date, e.Amount, e.Category) == (item.Date, item.Amount, item.Category)]
         if dups_for_item:
             dups_for_item.append(item)
